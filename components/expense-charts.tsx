@@ -5,15 +5,17 @@ import { useExpenseStore } from "@/lib/expense-store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  Chart,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendItem,
-  ChartPie,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts"
 import { format, subMonths, eachDayOfInterval, isSameDay } from "date-fns"
 
 export function ExpenseCharts() {
@@ -106,6 +108,9 @@ export function ExpenseCharts() {
   // Get the time series data for the selected range
   const timeSeriesData = getTimeSeriesData()
 
+  // Calculate total expenses for donut chart percentage
+  const totalExpenses = categoryData.reduce((sum, item) => sum + item.value, 0)
+
   return (
     <div className="space-y-6">
       {/* Category pie chart */}
@@ -124,31 +129,139 @@ export function ExpenseCharts() {
         </CardHeader>
         <CardContent>
           {categoryData.length > 0 ? (
-            <div className="h-80">
-              <ChartContainer>
-                <Chart className="h-80">
-                  <ChartPie
-                    data={categoryData}
-                    category="value"
-                    index="name"
-                    valueFormatter={(value) => `$${value.toFixed(2)}`}
-                    colors={categoryData.map((item) => item.color)}
-                    className="h-80 animate-float"
-                  />
-                  <ChartTooltip>
-                    <ChartTooltipContent formatValues={(value) => `$${value.toFixed(2)}`} />
-                  </ChartTooltip>
-                </Chart>
-                <ChartLegend className="max-h-40 overflow-y-auto">
-                  {categoryData.map((item) => (
-                    <ChartLegendItem
-                      key={item.name}
-                      color={item.color}
-                      name={`${item.name}: $${item.value.toFixed(2)}`}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-80">
+              <div className="h-80 flex items-center justify-center">
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: $${value.toFixed(2)}`}
+                      labelLine={false}
+                      animationDuration={1000}
+                    >
+                      {categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value) => [`$${Number(value).toFixed(2)}`, "Amount"]}
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        borderColor: "hsl(var(--border))",
+                        borderRadius: "0.5rem",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                      }}
                     />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div>
+                <div className="max-h-80 overflow-y-auto space-y-2">
+                  {categoryData.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                        <span className="text-sm">{item.name}</span>
+                      </div>
+                      <span className="font-medium">${item.value.toFixed(2)}</span>
+                    </div>
                   ))}
-                </ChartLegend>
-              </ChartContainer>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="h-80 flex items-center justify-center text-muted-foreground">
+              No expense data to display
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Donut chart for expense distribution */}
+      <Card className="overflow-hidden border-accent/10 shadow-lg">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-bl-full"></div>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-xl font-semibold text-accent flex items-center">
+            <span className="bg-accent/10 text-accent p-2 rounded-full mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </span>
+            Expense Distribution
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {categoryData.length > 0 ? (
+            <div className="h-80">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                <div className="flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false}
+                        animationDuration={1000}
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value) => [`$${Number(value).toFixed(2)}`, "Amount"]}
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          borderColor: "hsl(var(--border))",
+                          borderRadius: "0.5rem",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+                    {categoryData.map((item) => (
+                      <div key={item.name} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                            <span className="font-medium">{item.name}</span>
+                          </div>
+                          <span className="text-sm">${item.value.toFixed(2)}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div
+                            className="h-2 rounded-full"
+                            style={{
+                              width: `${((item.value / totalExpenses) * 100).toFixed(0)}%`,
+                              backgroundColor: item.color,
+                            }}
+                          ></div>
+                        </div>
+                        <div className="text-xs text-right text-muted-foreground">
+                          {((item.value / totalExpenses) * 100).toFixed(1)}% of total
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="h-80 flex items-center justify-center text-muted-foreground">

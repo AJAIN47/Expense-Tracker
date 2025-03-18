@@ -92,14 +92,14 @@ export function ExpenseForm() {
             Amount *
           </Label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
             <Input
               id="amount"
               type="number"
               min="0.01"
               step="0.01"
               placeholder="0.00"
-              className="pl-8 border-primary/20 focus:border-primary focus:ring-primary/30"
+              className="pl-8 border-primary/20 focus:border-primary focus:ring-primary/30 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               aria-required="true"
@@ -113,12 +113,16 @@ export function ExpenseForm() {
             Category *
           </Label>
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="border-primary/20 focus:ring-primary/30" aria-required="true">
+            <SelectTrigger
+              id="category"
+              className="border-primary/20 focus:ring-primary/30 bg-white dark:bg-gray-800 w-full text-gray-900 dark:text-gray-100"
+              aria-required="true"
+            >
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white dark:bg-gray-800 border-primary/20 z-50">
               {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id} className="flex items-center">
+                <SelectItem key={cat.id} value={cat.id} className="flex items-center text-gray-900 dark:text-gray-100">
                   <div className="flex items-center">
                     <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: cat.color }}></div>
                     {cat.name}
@@ -137,7 +141,7 @@ export function ExpenseForm() {
           <Input
             id="date"
             type="date"
-            className="border-primary/20 focus:border-primary focus:ring-primary/30"
+            className="border-primary/20 focus:border-primary focus:ring-primary/30 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             aria-required="true"
@@ -152,7 +156,7 @@ export function ExpenseForm() {
           <Input
             id="description"
             placeholder="What was this expense for?"
-            className="border-primary/20 focus:border-primary focus:ring-primary/30"
+            className="border-primary/20 focus:border-primary focus:ring-primary/30 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -161,7 +165,7 @@ export function ExpenseForm() {
         {/* Submit button */}
         <Button
           type="submit"
-          className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all duration-200"
+          className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all duration-200 text-white"
         >
           Add Expense
         </Button>

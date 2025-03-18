@@ -5,7 +5,6 @@ import type React from "react"
 import { useState } from "react"
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -17,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { useExpenseStore } from "@/lib/expense-store"
 import { useToast } from "@/hooks/use-toast"
-import { Trash2Icon, DownloadIcon, UploadIcon } from "lucide-react"
+import { Trash2Icon, DownloadIcon, UploadIcon, RefreshCwIcon } from "lucide-react"
 
 interface ExpenseControlsProps {
   className?: string
@@ -25,11 +24,27 @@ interface ExpenseControlsProps {
 
 export function ExpenseControls({ className = "" }: ExpenseControlsProps) {
   // Get expenses and actions from the store
-  const { expenses, clearAllExpenses, importExpenses } = useExpenseStore()
+  const { expenses, clearAllExpenses, importExpenses, loadMockData } = useExpenseStore()
   const { toast } = useToast()
+
+  // State for alert dialog
+  const [isAlertOpen, setIsAlertOpen] = useState(false)
 
   // State to track when import is in progress
   const [isImporting, setIsImporting] = useState(false)
+
+  /**
+   * Handle clearing all expenses
+   */
+  const handleClearAll = () => {
+    clearAllExpenses()
+    toast({
+      title: "Data cleared",
+      description: "All expense data has been deleted",
+      variant: "default",
+    })
+    setIsAlertOpen(false)
+  }
 
   /**
    * Export expenses to a JSON file
@@ -119,6 +134,18 @@ export function ExpenseControls({ className = "" }: ExpenseControlsProps) {
     reader.readAsText(file)
   }
 
+  /**
+   * Load mock data for demonstration
+   */
+  const handleLoadMockData = () => {
+    loadMockData()
+    toast({
+      title: "Mock data loaded",
+      description: "Sample expense data has been loaded for demonstration",
+      variant: "default",
+    })
+  }
+
   return (
     <div className={`flex flex-wrap gap-3 justify-end ${className}`}>
       {/* Import button */}
@@ -166,8 +193,19 @@ export function ExpenseControls({ className = "" }: ExpenseControlsProps) {
         Export
       </Button>
 
+      {/* Load mock data button */}
+      <Button
+        variant="outline"
+        className="bg-white dark:bg-gray-800 border-accent/20 text-accent hover:text-accent hover:bg-accent/10"
+        onClick={handleLoadMockData}
+        aria-label="Load sample data"
+      >
+        <RefreshCwIcon className="mr-2 h-4 w-4" />
+        Load Sample Data
+      </Button>
+
       {/* Clear all data button with confirmation dialog */}
-      <AlertDialog>
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogTrigger asChild>
           <Button
             variant="outline"
@@ -188,19 +226,12 @@ export function ExpenseControls({ className = "" }: ExpenseControlsProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                clearAllExpenses()
-                toast({
-                  title: "Data cleared",
-                  description: "All expense data has been deleted",
-                  variant: "default",
-                })
-              }}
+            <Button
+              onClick={handleClearAll}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete All Data
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -84,18 +84,22 @@ export function ExpenseList({ className = "" }: ExpenseListProps) {
           placeholder="Search expenses..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 border-primary/20 focus:border-primary focus:ring-primary/30"
+          className="flex-1 border-primary/20 focus:border-primary focus:ring-primary/30 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           aria-label="Search expenses"
         />
 
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full sm:w-[180px] border-primary/20 focus:ring-primary/30">
+          <SelectTrigger className="w-full sm:w-[180px] border-primary/20 focus:ring-primary/30 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
             <SelectValue placeholder="All categories" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white dark:bg-gray-800 border-primary/20 z-50">
             <SelectItem value="all">All categories</SelectItem>
             {categories.map((category) => (
-              <SelectItem key={category.id} value={category.id} className="flex items-center">
+              <SelectItem
+                key={category.id}
+                value={category.id}
+                className="flex items-center text-gray-900 dark:text-gray-100"
+              >
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: category.color }}></div>
                   {category.name}

@@ -20,15 +20,15 @@ body {
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
+    --primary: 280 75% 60%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 328 75% 60%;
+    --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
+    --accent: 130 75% 60%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 350 89% 60%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
@@ -48,6 +48,7 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -55,13 +56,13 @@ body {
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
+    --primary: 280 75% 60%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 328 75% 60%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
+    --accent: 130 75% 60%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
@@ -91,6 +92,35 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Simple dark mode implementation */
+  .light {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+}
+
+/* Improved input styling for better contrast */
+input,
+select,
+textarea {
+  @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100;
+}
+
+input::placeholder,
+select::placeholder,
+textarea::placeholder {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+/* Improved focus states for better accessibility */
+input:focus,
+select:focus,
+textarea:focus {
+  @apply ring-2 ring-primary/50 dark:ring-primary/70 border-primary dark:border-primary;
 }
 
 /* Custom animations */
@@ -128,7 +158,7 @@ body {
 
 /* Custom gradients */
 .gradient-bg {
-  background: linear-gradient(135deg, hsl(280, 75%, 60%) 0%, hsl(328, 75%, 60%) 100%);
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
 }
 
 .card-gradient {
@@ -148,11 +178,37 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(280, 75%, 60%);
+  background: hsl(var(--primary));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(328, 75%, 60%);
+  background: hsl(var(--secondary));
+}
+
+/* Fix for select dropdown positioning */
+.radix-select-content {
+  z-index: 100 !important;
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--border));
+}
+
+/* Ensure proper dark mode styling for select components */
+.dark .radix-select-content {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+/* Fix for select dropdown positioning */
+[data-radix-popper-content-wrapper] {
+  z-index: 100 !important;
+}
+
+/* Ensure theme toggle is clickable */
+.theme-toggle-button {
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto !important;
 }
 

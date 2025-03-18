@@ -24,6 +24,7 @@ export interface Category {
 interface ExpenseState {
   expenses: Expense[]
   categories: Category[]
+  hasMockDataLoaded: boolean
 
   // Actions for managing expenses
   addExpense: (expense: Expense) => void
@@ -37,6 +38,7 @@ interface ExpenseState {
   // Utility actions
   clearAllExpenses: () => void
   importExpenses: (expenses: Expense[]) => void
+  loadMockData: () => void
 }
 
 // Default categories with predefined colors
@@ -51,6 +53,106 @@ const defaultCategories: Category[] = [
   { id: "other", name: "Other", color: "#6D8A96" },
 ]
 
+// Mock data for demonstration purposes
+const mockExpenses: Expense[] = [
+  {
+    id: "mock-1",
+    amount: 85.75,
+    description: "Grocery shopping",
+    category: "food",
+    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 2 days ago
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-2",
+    amount: 45.0,
+    description: "Gas station",
+    category: "transport",
+    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 5 days ago
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-3",
+    amount: 1200.0,
+    description: "Monthly rent",
+    category: "housing",
+    date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 15 days ago
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-4",
+    amount: 65.5,
+    description: "Movie tickets and dinner",
+    category: "entertainment",
+    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 7 days ago
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-5",
+    amount: 120.3,
+    description: "Electricity bill",
+    category: "utilities",
+    date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 10 days ago
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-6",
+    amount: 210.0,
+    description: "Doctor visit",
+    category: "healthcare",
+    date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 20 days ago
+    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-7",
+    amount: 150.25,
+    description: "New clothes",
+    category: "shopping",
+    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 3 days ago
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-8",
+    amount: 25.0,
+    description: "Donation",
+    category: "other",
+    date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 12 days ago
+    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-9",
+    amount: 35.45,
+    description: "Lunch with colleagues",
+    category: "food",
+    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 1 day ago
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-10",
+    amount: 55.0,
+    description: "Uber rides",
+    category: "transport",
+    date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 4 days ago
+    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-11",
+    amount: 80.0,
+    description: "Internet bill",
+    category: "utilities",
+    date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 8 days ago
+    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-12",
+    amount: 95.6,
+    description: "Concert tickets",
+    category: "entertainment",
+    date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 25 days ago
+    createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
 // Create the store with persistence to localStorage
 export const useExpenseStore = create<ExpenseState>()(
   persist(
@@ -58,6 +160,7 @@ export const useExpenseStore = create<ExpenseState>()(
       // Initial state
       expenses: [],
       categories: defaultCategories,
+      hasMockDataLoaded: false,
 
       // Add a new expense to the store
       addExpense: (expense) =>
@@ -90,13 +193,24 @@ export const useExpenseStore = create<ExpenseState>()(
         })),
 
       // Clear all expenses (but keep categories)
-      clearAllExpenses: () => set({ expenses: [] }),
+      clearAllExpenses: () =>
+        set({
+          expenses: [],
+          hasMockDataLoaded: false,
+        }),
 
       // Import expenses from external source (e.g., JSON file)
       importExpenses: (importedExpenses) =>
         set((state) => ({
           expenses: [...state.expenses, ...importedExpenses],
         })),
+
+      // Load mock data for demonstration
+      loadMockData: () =>
+        set({
+          expenses: mockExpenses,
+          hasMockDataLoaded: true,
+        }),
     }),
     {
       // Configuration for localStorage persistence
